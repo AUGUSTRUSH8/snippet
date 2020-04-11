@@ -48,3 +48,34 @@
 
 3 Base64编码
 Base64是网络上最常见的用于传输8Bit字节代码的编码方式之一。Base64编码可用于在HTTP环境下传递较长的标识信息。采用Base64编码解码具有不可读性，即所编码的数据不会被人用肉眼所直接看到。注意：Base64只是一种编码方式，不算加密方法
+
+#### ElasticSearch与Solr对比
+
+- Solr 利用 Zookeeper 进行分布式管理，而 Elasticsearch 自身带有分布式协调管理功能;
+- Solr 支持更多格式的数据，而 Elasticsearch 仅支持json文件格式；
+- Solr 官方提供的功能更多，而 Elasticsearch 本身更注重于核心功能，高级功能多有第三方插件提供；
+- Solr 在传统的搜索应用中表现好于 Elasticsearch，但在处理实时搜索应用时效率明显低于 Elasticsearch
+
+#### Elasticsearch对比传统关系型数据库理解
+
+```xml
+Relational DB ‐> Databases ‐> Tables ‐> Rows ‐> Columns
+Elasticsearch ‐> Indices ‐> Types ‐> Documents ‐> Fields
+```
+
+#### Linux 下批量杀掉筛选进程
+
+在做项目的时候，由于情况要求，需要把服务器上符合某一条件的进程全部 kill 掉，但是又不能使用 killAll 直接杀掉某一进程名称包含的所有运行中的进程 (即我们可能只需要杀掉某一类含有特定参数命令的进程)。
+具体命令参考：
+ps -ef | grep test | grep -v grep | awk '{print $2}' | xargs kill -9
+其中：
+| 管道符，用来隔开两个命令，管道符左边命令的输出会作为管道符右边命令的输入。
+ps 命令用来列出系统中当前运行的进程， ps -ef 显示所有进程信息，联通命令行。
+grep 命令用于过滤 / 搜索特定字符，grep test 在这里为搜索过滤所有含有‘test’名称的进程
+grep -v grep-v 显示不包含匹配文本的所有行，在这里为筛选出所有不包含 grep 名称的进程，对上一步的进程再做一次筛选 (因为 ps -ef 列出了所有的命令，包括命令行)
+awk 在文件或字符串中基于指定规则浏览和抽取信息；把文件逐行读入，以空格为默认分隔符将每行切片，然后再进行后序处理。这里利用 awk '{print $2}' 将上一步中过滤得到的进程进行打印，$2 表示打印第二个域 (PID，进程号) $0 表示所有域，$1 表示第一个域，$n 表示第 n 个域。
+xargs 命令是给命令传递参数的过滤器，善于把标准数据数据转换成命令行参数。在这里则是将获取前一个命令的标准输出然后转换成命令行参数传递给后面的 kill 命令。
+kill -9 强制关闭进程。
+此外，也有使用 cut 命令进行处理的，参考如下：
+ps -ef | grep test | grep -v grep | cut -c 9-15 | xargs kill -9
+cut -c 9-15 仅显示第 9-15 个字符 (即 PID，进程号)
